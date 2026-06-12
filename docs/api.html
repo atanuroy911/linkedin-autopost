@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Reference — LinkedIn AI Publisher Docs</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html"><div class="logo-icon">in</div><div class="logo-text"><div class="logo-title">LinkedIn AI Publisher</div><div class="logo-sub">Documentation</div></div></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Getting Started</div>
+      <a class="nav-link" href="index.html"><span class="icon">🏠</span>Overview</a>
+      <a class="nav-link" href="installation.html"><span class="icon">⚙️</span>Installation</a>
+      <a class="nav-link" href="configuration.html"><span class="icon">🔧</span>Configuration</a>
+      <a class="nav-link" href="deployment.html"><span class="icon">🚀</span>Deployment</a>
+      <div class="nav-section">Features</div>
+      <a class="nav-link" href="features.html"><span class="icon">✨</span>All Features</a>
+      <div class="nav-section">Reference</div>
+      <a class="nav-link active" href="api.html"><span class="icon">📡</span>API Reference</a>
+      <a class="nav-link" href="api.html#auth"><span class="icon">🔐</span>Authentication</a>
+      <a class="nav-link" href="api.html#content-api"><span class="icon">💡</span>Content API</a>
+      <a class="nav-link" href="api.html#campaigns-api"><span class="icon">🎯</span>Campaigns API</a>
+      <a class="nav-link" href="api.html#posts-api"><span class="icon">📄</span>Posts API</a>
+      <a class="nav-link" href="api.html#ai-api"><span class="icon">🤖</span>AI API</a>
+      <a class="nav-link" href="api.html#linkedin-api"><span class="icon">🔗</span>LinkedIn API</a>
+      <a class="nav-link" href="api.html#notifications-api"><span class="icon">🔔</span>Notifications API</a>
+      <a class="nav-link" href="architecture.html"><span class="icon">🏗️</span>Architecture</a>
+    </nav>
+    <div class="sidebar-footer"><p>v1.0 &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub ↗</a></p></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb"><a href="index.html">Docs</a><span class="breadcrumb-sep">/</span><span>API Reference</span></div>
+    </div>
+    <div class="page">
+
+      <h1>API Reference</h1>
+      <p class="lead">All API routes are Next.js App Router route handlers under <code>/src/app/api/</code>. They require authentication via session cookie (NextAuth) unless otherwise noted.</p>
+
+      <h2 id="auth">🔐 Authentication</h2>
+      <p>All API routes (except <code>/api/auth/*</code>) require a valid session. Sessions are established via NextAuth credential login and stored as HTTP-only cookies.</p>
+
+      <div class="callout info">
+        <div class="callout-icon">ℹ️</div>
+        <p>There is no public REST API with API keys. All endpoints are session-authenticated, designed for the web app's own frontend consumption.</p>
+      </div>
+
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/auth/signin</span></div>
+      <p>NextAuth credential sign-in. Body: <code>{ email, password }</code></p>
+
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/auth/signout</span></div>
+      <p>Sign out and clear session cookie.</p>
+
+      <!-- ─── Content API ─── -->
+      <h2 id="content-api">💡 Content API</h2>
+
+      <h3>Discover content ideas</h3>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/content/discover</span></div>
+      <p>Takes pasted text and returns 6 AI-generated content ideas.</p>
+      <span class="code-label">Request Body</span>
+      <pre><code>{
+  <span class="str">"sourceContent"</span>: <span class="str">"Paste any text here..."</span>
+}</code></pre>
+      <span class="code-label">Response</span>
+      <pre><code>{
+  <span class="str">"success"</span>: <span class="val">true</span>,
+  <span class="str">"ideas"</span>: [
+    {
+      <span class="str">"title"</span>: <span class="str">"Why AI is reshaping content marketing"</span>,
+      <span class="str">"angle"</span>: <span class="str">"Contrarian take on AI content tools"</span>,
+      <span class="str">"hook"</span>: <span class="str">"Everyone says AI will replace writers. They're half right."</span>,
+      <span class="str">"tags"</span>: [<span class="str">"AI"</span>, <span class="str">"ContentMarketing"</span>, <span class="str">"Writing"</span>]
+    }
+    <span class="cmt">// ... 5 more</span>
+  ]
+}</code></pre>
+
+      <h3>I Read — article-to-posts</h3>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/content/iread</span></div>
+      <p>Takes article text and returns 3 complete LinkedIn posts from 3 angles.</p>
+      <span class="code-label">Request Body</span>
+      <pre><code>{
+  <span class="str">"content"</span>: <span class="str">"Full article text..."</span>,
+  <span class="str">"tone"</span>: <span class="str">"Conversational"</span>  <span class="cmt">// optional</span>
+}</code></pre>
+      <span class="code-label">Response</span>
+      <pre><code>{
+  <span class="str">"success"</span>: <span class="val">true</span>,
+  <span class="str">"posts"</span>: [
+    {
+      <span class="str">"angle"</span>: <span class="str">"key_insight"</span>,
+      <span class="str">"angleLabel"</span>: <span class="str">"Key Insight"</span>,
+      <span class="str">"summary"</span>: <span class="str">"The most surprising finding from this research"</span>,
+      <span class="str">"content"</span>: <span class="str">"I just read a fascinating study on..."</span>,
+      <span class="str">"hashtags"</span>: [<span class="str">"Research"</span>, <span class="str">"Learning"</span>]
+    },
+    <span class="cmt">// practical_application, nuanced_take</span>
+  ]
+}</code></pre>
+
+      <!-- ─── Campaigns API ─── -->
+      <h2 id="campaigns-api">🎯 Campaigns API</h2>
+
+      <h3>List campaigns</h3>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/campaigns</span></div>
+      <p>Returns all campaigns for the authenticated user.</p>
+      <span class="code-label">Response</span>
+      <pre><code>{
+  <span class="str">"campaigns"</span>: [
+    {
+      <span class="str">"_id"</span>: <span class="str">"664abc..."</span>,
+      <span class="str">"name"</span>: <span class="str">"Weekly AI Insights"</span>,
+      <span class="str">"niche"</span>: {
+        <span class="str">"industry"</span>: <span class="str">"Technology"</span>,
+        <span class="str">"topics"</span>: [<span class="str">"AI"</span>, <span class="str">"Machine Learning"</span>],
+        <span class="str">"keywords"</span>: [<span class="str">"GPT"</span>, <span class="str">"automation"</span>]
+      },
+      <span class="str">"tone"</span>: <span class="str">"Educational"</span>,
+      <span class="str">"schedule"</span>: {
+        <span class="str">"frequency"</span>: <span class="str">"weekly"</span>,
+        <span class="str">"daysOfWeek"</span>: [<span class="num">1</span>, <span class="num">3</span>],
+        <span class="str">"time"</span>: <span class="str">"09:00"</span>,
+        <span class="str">"timezone"</span>: <span class="str">"Asia/Dhaka"</span>,
+        <span class="str">"cronExpression"</span>: <span class="str">"0 9 * * 1,3"</span>
+      },
+      <span class="str">"approvalMode"</span>: <span class="str">"email"</span>,
+      <span class="str">"isActive"</span>: <span class="val">true</span>,
+      <span class="str">"postsGenerated"</span>: <span class="num">12</span>,
+      <span class="str">"lastRunAt"</span>: <span class="str">"2026-06-09T09:00:00.000Z"</span>
+    }
+  ]
+}</code></pre>
+
+      <h3>Create campaign</h3>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/campaigns</span></div>
+      <span class="code-label">Request Body</span>
+      <pre><code>{
+  <span class="str">"name"</span>: <span class="str">"Weekly AI Insights"</span>,
+  <span class="str">"niche"</span>: {
+    <span class="str">"industry"</span>: <span class="str">"Technology"</span>,
+    <span class="str">"topics"</span>: [<span class="str">"Artificial Intelligence"</span>, <span class="str">"LLMs"</span>],
+    <span class="str">"keywords"</span>: [<span class="str">"AI"</span>, <span class="str">"automation"</span>]
+  },
+  <span class="str">"tone"</span>: <span class="str">"Educational"</span>,
+  <span class="str">"examplePosts"</span>: [<span class="str">"Example post 1..."</span>, <span class="str">"Example post 2..."</span>],
+  <span class="str">"schedule"</span>: {
+    <span class="str">"frequency"</span>: <span class="str">"weekly"</span>,
+    <span class="str">"daysOfWeek"</span>: [<span class="num">1</span>, <span class="num">3</span>],
+    <span class="str">"time"</span>: <span class="str">"09:00"</span>,
+    <span class="str">"timezone"</span>: <span class="str">"Asia/Dhaka"</span>
+  },
+  <span class="str">"approvalMode"</span>: <span class="str">"email"</span>,
+  <span class="str">"isActive"</span>: <span class="val">true</span>
+}</code></pre>
+
+      <h3>Update campaign</h3>
+      <div class="endpoint"><span class="method method-patch">PATCH</span><span class="endpoint-path">/api/campaigns/:id</span></div>
+      <p>Update any editable field. <strong>Niche fields are ignored</strong> — they cannot be changed after creation.</p>
+      <div class="callout warning"><div class="callout-icon">⚠️</div><p>Changing <code>isActive</code> from <code>false</code> to <code>true</code> will immediately add a BullMQ repeating job. Changing from <code>true</code> to <code>false</code> will remove it.</p></div>
+
+      <h3>Delete campaign</h3>
+      <div class="endpoint"><span class="method method-delete">DELETE</span><span class="endpoint-path">/api/campaigns/:id</span></div>
+      <p>Deletes the campaign and cancels the repeating BullMQ cron job.</p>
+
+      <!-- ─── Posts API ─── -->
+      <h2 id="posts-api">📄 Posts API</h2>
+
+      <h3>Generate posts (via AI)</h3>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/posts</span></div>
+      <p>Queues an AI content generation job. Posts appear in Drafts when complete.</p>
+      <span class="code-label">Request Body</span>
+      <pre><code>{
+  <span class="str">"topic"</span>: <span class="str">"Why remote work changed team dynamics"</span>,
+  <span class="str">"keywords"</span>: [<span class="str">"remote"</span>, <span class="str">"leadership"</span>],
+  <span class="str">"tone"</span>: <span class="str">"Conversational"</span>,
+  <span class="str">"count"</span>: <span class="num">1</span>
+}</code></pre>
+
+      <h3>Save draft (no AI generation)</h3>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/posts/draft</span></div>
+      <p>Saves pre-written content directly as a draft — bypasses the generation queue. Used by the <em>I Read</em> feature.</p>
+      <span class="code-label">Request Body</span>
+      <pre><code>{
+  <span class="str">"content"</span>: <span class="str">"Full LinkedIn post text..."</span>,
+  <span class="str">"hashtags"</span>: [<span class="str">"tag1"</span>, <span class="str">"tag2"</span>]
+}</code></pre>
+
+      <h3>Get / Update / Delete a post</h3>
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/posts/:id</span></div>
+      <div class="endpoint"><span class="method method-patch">PATCH</span><span class="endpoint-path">/api/posts/:id</span></div>
+      <div class="endpoint"><span class="method method-delete">DELETE</span><span class="endpoint-path">/api/posts/:id</span></div>
+
+      <p>PATCH supports updating <code>content</code>, <code>hashtags</code>, <code>status</code>, <code>rejectionReason</code>.</p>
+
+      <h3>Publish a post immediately</h3>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/posts/:id/publish</span></div>
+      <span class="code-label">Request Body</span>
+      <pre><code>{
+  <span class="str">"action"</span>: <span class="str">"publish_now"</span>
+  <span class="cmt">// or</span>
+  <span class="str">"action"</span>: <span class="str">"schedule"</span>,
+  <span class="str">"scheduledAt"</span>: <span class="str">"2026-06-15T09:00:00.000Z"</span>
+}</code></pre>
+
+      <h3>Sync published post status</h3>
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/posts/sync</span></div>
+      <p>Checks LinkedIn API to verify if a post still exists. Updates status to <code>deleted</code> if LinkedIn has removed it.</p>
+
+      <!-- ─── AI API ─── -->
+      <h2 id="ai-api">🤖 AI API</h2>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/ai/settings</span></div>
+      <p>Get the current user's active AI provider settings (API key is masked).</p>
+
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/ai/settings</span></div>
+      <p>Save AI provider configuration. API key is AES-256-GCM encrypted before storage.</p>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/ai/models</span></div>
+      <p>Fetch available models from the configured AI provider.</p>
+
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/ai/test</span></div>
+      <p>Test the AI provider connection by sending a short test prompt.</p>
+
+      <div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/ai/chat</span></div>
+      <p>Direct chat with the configured AI provider. Used internally by generation features.</p>
+
+      <!-- ─── LinkedIn API ─── -->
+      <h2 id="linkedin-api">🔗 LinkedIn API</h2>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/linkedin/connect</span></div>
+      <p>Initiates the LinkedIn OAuth flow. Redirects to LinkedIn's authorization page.</p>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/linkedin/callback</span></div>
+      <p>OAuth callback. Exchanges the auth code for an access token, stores encrypted token. Redirects to <code>/settings?tab=linkedin</code>.</p>
+
+      <!-- ─── Notifications API ─── -->
+      <h2 id="notifications-api">🔔 Notifications API</h2>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/notifications</span></div>
+      <p>List all notifications for the current user. Supports <code>?unread=true</code> filter.</p>
+
+      <div class="endpoint"><span class="method method-patch">PATCH</span><span class="endpoint-path">/api/notifications</span></div>
+      <p>Mark notifications as read. Body: <code>{ "ids": ["id1", "id2"] }</code> or <code>{ "all": true }</code>.</p>
+
+      <!-- ─── Admin API ─── -->
+      <h2 id="admin-api">🛡️ Admin API</h2>
+      <p>All admin endpoints require <code>role: "admin"</code> on the session user.</p>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/admin/stats</span></div>
+      <p>Platform-wide statistics: user count, posts generated, active LinkedIn accounts, etc.</p>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/admin/users</span></div>
+      <div class="endpoint"><span class="method method-patch">PATCH</span><span class="endpoint-path">/api/admin/users/:id</span></div>
+      <p>Manage user accounts — list all users, update status (active/suspended).</p>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/admin/logs</span></div>
+      <p>Activity audit log for all user actions across the platform.</p>
+
+      <!-- ─── Developer API ─── -->
+      <h2 id="developer-api">🛠️ Developer API</h2>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/developer/syslogs</span></div>
+      <p>Stream of server-side console logs stored in Redis. Used by the Developer → System Logs page.</p>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/developer/queues</span></div>
+      <p>BullMQ queue statistics — active, waiting, completed, and failed job counts per queue.</p>
+
+      <div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/dashboard</span></div>
+      <p>Dashboard statistics: recent posts, counts by status, recent activity timeline.</p>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

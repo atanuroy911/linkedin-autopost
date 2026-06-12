@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn AI Publisher — Documentation</title>
+  <meta name="description" content="Comprehensive documentation for LinkedIn AI Publisher — an AI-powered LinkedIn auto-posting platform.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-icon">in</div>
+      <div class="logo-text">
+        <div class="logo-title">LinkedIn AI Publisher</div>
+        <div class="logo-sub">Documentation</div>
+      </div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Getting Started</div>
+      <a class="nav-link active" href="index.html"><span class="icon">🏠</span>Overview</a>
+      <a class="nav-link" href="installation.html"><span class="icon">⚙️</span>Installation</a>
+      <a class="nav-link" href="configuration.html"><span class="icon">🔧</span>Configuration</a>
+      <a class="nav-link" href="deployment.html"><span class="icon">🚀</span>Deployment</a>
+
+      <div class="nav-section">Features</div>
+      <a class="nav-link" href="features.html"><span class="icon">✨</span>All Features</a>
+      <a class="nav-link" href="features.html#content-discovery"><span class="icon">💡</span>Content Discovery</a>
+      <a class="nav-link" href="features.html#i-read"><span class="icon">📖</span>I Read</a>
+      <a class="nav-link" href="features.html#campaigns"><span class="icon">🎯</span>Campaigns</a>
+      <a class="nav-link" href="features.html#drafts"><span class="icon">📝</span>Drafts & Approval</a>
+      <a class="nav-link" href="features.html#ai-providers"><span class="icon">🤖</span>AI Providers</a>
+
+      <div class="nav-section">Reference</div>
+      <a class="nav-link" href="api.html"><span class="icon">📡</span>API Reference</a>
+      <a class="nav-link" href="api.html#auth"><span class="icon">🔐</span>Authentication</a>
+      <a class="nav-link" href="api.html#campaigns-api"><span class="icon">🎯</span>Campaigns API</a>
+      <a class="nav-link" href="api.html#posts-api"><span class="icon">📄</span>Posts API</a>
+
+      <div class="nav-section">Architecture</div>
+      <a class="nav-link" href="architecture.html"><span class="icon">🏗️</span>System Design</a>
+      <a class="nav-link" href="architecture.html#workers"><span class="icon">⚡</span>Background Workers</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>v1.0 &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub ↗</a></p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Overview</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="btn-github" href="https://github.com" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <div class="page">
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-badge">📘 Documentation v1.0</div>
+        <h1>LinkedIn AI Publisher</h1>
+        <p>An open-source, self-hosted platform to automatically generate, schedule, and publish AI-powered content to LinkedIn — with full control over your data, AI provider, and posting workflow.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="installation.html">Get Started →</a>
+          <a class="btn-outline" href="features.html">Explore Features</a>
+        </div>
+      </div>
+
+      <!-- What is it -->
+      <h2>What is LinkedIn AI Publisher?</h2>
+      <p>LinkedIn AI Publisher is a <strong>self-hosted, full-stack web application</strong> that combines AI content generation with LinkedIn's publishing API. It helps professionals and founders maintain a consistent LinkedIn presence without spending hours writing posts manually.</p>
+      <p>You bring your own AI provider API key (OpenAI, Claude, Gemini, Ollama, or OpenRouter), connect your LinkedIn account, and the platform handles content discovery, campaign scheduling, approval workflows, and publishing.</p>
+
+      <!-- Key features -->
+      <h2>Key Features</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <div class="card-title">Content Discovery</div>
+          <div class="card-desc">Paste any text — notes, articles, blog posts. AI extracts 6 unique LinkedIn post angles.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📖</div>
+          <div class="card-title">I Read</div>
+          <div class="card-desc">Paste an article you've read. AI writes 3 complete LinkedIn posts from different perspectives, in your voice.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">Campaigns</div>
+          <div class="card-desc">Define a niche, set a weekly/monthly schedule, and let AI auto-generate and publish posts on autopilot.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">✉️</div>
+          <div class="card-title">Email Approval</div>
+          <div class="card-desc">Choose to review every post before it goes live. Get an email with a preview and approve from Drafts.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🤖</div>
+          <div class="card-title">Multi-Provider AI</div>
+          <div class="card-desc">Works with OpenAI, Anthropic Claude, Google Gemini, Ollama (local), and OpenRouter.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔒</div>
+          <div class="card-title">Self-Hosted</div>
+          <div class="card-desc">Your data stays on your server. All API keys are AES-256-GCM encrypted at rest.</div>
+        </div>
+      </div>
+
+      <!-- Tech Stack -->
+      <h2>Technology Stack</h2>
+      <div class="stack">
+        <div class="stack-item"><div class="dot" style="background:#000"></div>Next.js 16 (App Router)</div>
+        <div class="stack-item"><div class="dot" style="background:#47A248"></div>MongoDB</div>
+        <div class="stack-item"><div class="dot" style="background:#DC382D"></div>Redis + BullMQ</div>
+        <div class="stack-item"><div class="dot" style="background:#2496ED"></div>Docker</div>
+        <div class="stack-item"><div class="dot" style="background:#3178C6"></div>TypeScript</div>
+        <div class="stack-item"><div class="dot" style="background:#0077B5"></div>LinkedIn API v2</div>
+        <div class="stack-item"><div class="dot" style="background:#412991"></div>NextAuth.js</div>
+        <div class="stack-item"><div class="dot" style="background:#E11D48"></div>Nodemailer</div>
+      </div>
+
+      <!-- Architecture overview -->
+      <h2>Architecture Overview</h2>
+      <pre><code><span class="cmt"># System Components</span>
+
+┌─────────────────────────────────────────────────────┐
+│                    Browser (User)                    │
+└─────────────────────┬───────────────────────────────┘
+                      │ HTTPS
+┌─────────────────────▼───────────────────────────────┐
+│              Next.js App (Port 4000)                 │
+│  ┌─────────────┐  ┌───────────────┐  ┌──────────┐  │
+│  │  App Router │  │  API Routes   │  │ NextAuth  │  │
+│  │  (UI Pages) │  │  /api/*       │  │  (Auth)   │  │
+│  └─────────────┘  └───────┬───────┘  └──────────┘  │
+└──────────────────────────┬┘────────────────────────┘
+                           │
+         ┌─────────────────┼─────────────────┐
+         │                 │                 │
+┌────────▼──────┐  ┌───────▼──────┐  ┌─────▼──────┐
+│   MongoDB     │  │    Redis     │  │  LinkedIn  │
+│   (Data)      │  │  (Jobs/Cache)│  │    API     │
+└───────────────┘  └──────┬───────┘  └────────────┘
+                          │
+              ┌───────────▼───────────┐
+              │   BullMQ Worker       │
+              │  (Separate process)   │
+              │  · content-generation │
+              │  · auto-publish       │
+              │  · campaign-runner    │
+              │  · scheduled-publish  │
+              │  · notifications      │
+              └───────────────────────┘</code></pre>
+
+      <!-- Quick Start -->
+      <h2>Quick Start</h2>
+      <ol class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Clone & Install</strong>
+            <p>Clone the repository and install dependencies with <code>npm install</code>.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Configure Environment</strong>
+            <p>Copy <code>.env.example</code> to <code>.env.production</code> and fill in MongoDB URI, Redis URL, LinkedIn OAuth credentials, and your encryption key.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Deploy with Docker</strong>
+            <p>Run <code>./deploy.sh</code> to build and start all containers (web server + BullMQ worker + Redis).</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Connect LinkedIn</strong>
+            <p>Log in, go to Settings → LinkedIn, and connect your account via OAuth.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>Configure AI Provider</strong>
+            <p>Go to Settings → AI Provider, choose OpenAI / Claude / Gemini / Ollama / OpenRouter, and enter your API key.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <strong>Create Content or a Campaign</strong>
+            <p>Use <em>Content → Discover</em> for one-off posts, <em>Content → I Read</em> to repurpose articles, or <em>Campaigns</em> to schedule automated posting.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="callout info">
+        <div class="callout-icon">ℹ️</div>
+        <p>For detailed setup instructions see the <a href="installation.html">Installation Guide</a>. For all environment variables see <a href="configuration.html">Configuration</a>.</p>
+      </div>
+
+      <!-- Navigation cards -->
+      <h2>Continue Reading</h2>
+      <div class="card-grid">
+        <a href="installation.html" style="text-decoration:none">
+          <div class="card">
+            <div class="card-icon">⚙️</div>
+            <div class="card-title">Installation →</div>
+            <div class="card-desc">Prerequisites, cloning, seeding the database, and running locally.</div>
+          </div>
+        </a>
+        <a href="configuration.html" style="text-decoration:none">
+          <div class="card">
+            <div class="card-icon">🔧</div>
+            <div class="card-title">Configuration →</div>
+            <div class="card-desc">All environment variables, LinkedIn OAuth setup, SMTP config.</div>
+          </div>
+        </a>
+        <a href="features.html" style="text-decoration:none">
+          <div class="card">
+            <div class="card-icon">✨</div>
+            <div class="card-title">Features →</div>
+            <div class="card-desc">Detailed guide for every feature: Content, Campaigns, Drafts, and more.</div>
+          </div>
+        </a>
+        <a href="api.html" style="text-decoration:none">
+          <div class="card">
+            <div class="card-icon">📡</div>
+            <div class="card-title">API Reference →</div>
+            <div class="card-desc">All REST endpoints, request/response formats, and authentication.</div>
+          </div>
+        </a>
+      </div>
+
+    </div><!-- /page -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+</body>
+</html>

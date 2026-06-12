@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deployment — LinkedIn AI Publisher Docs</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html"><div class="logo-icon">in</div><div class="logo-text"><div class="logo-title">LinkedIn AI Publisher</div><div class="logo-sub">Documentation</div></div></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Getting Started</div>
+      <a class="nav-link" href="index.html"><span class="icon">🏠</span>Overview</a>
+      <a class="nav-link" href="installation.html"><span class="icon">⚙️</span>Installation</a>
+      <a class="nav-link" href="configuration.html"><span class="icon">🔧</span>Configuration</a>
+      <a class="nav-link active" href="deployment.html"><span class="icon">🚀</span>Deployment</a>
+      <div class="nav-section">Features</div>
+      <a class="nav-link" href="features.html"><span class="icon">✨</span>All Features</a>
+      <div class="nav-section">Reference</div>
+      <a class="nav-link" href="api.html"><span class="icon">📡</span>API Reference</a>
+      <a class="nav-link active" href="architecture.html"><span class="icon">🏗️</span>Architecture</a>
+    </nav>
+    <div class="sidebar-footer"><p>v1.0 &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub ↗</a></p></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb"><a href="index.html">Docs</a><span class="breadcrumb-sep">/</span><span>Deployment</span></div>
+    </div>
+    <div class="page">
+
+      <h1>Deployment</h1>
+      <p class="lead">LinkedIn AI Publisher is deployed via Docker Compose. The <code>deploy.sh</code> script handles building images and starting containers in the correct order.</p>
+
+      <h2 id="requirements">Infrastructure Requirements</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Service</th><th>Minimum</th><th>Recommended</th></tr></thead>
+          <tbody>
+            <tr><td>CPU</td><td>1 vCPU</td><td>2 vCPU</td></tr>
+            <tr><td>RAM</td><td>1 GB</td><td>2 GB</td></tr>
+            <tr><td>Disk</td><td>10 GB</td><td>20 GB</td></tr>
+            <tr><td>MongoDB</td><td>Local (docker) or Atlas Free</td><td>Atlas M10+</td></tr>
+            <tr><td>Redis</td><td>Local (docker)</td><td>Local (docker)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="docker">Docker Compose Deployment</h2>
+
+      <h3>1. Prepare Environment File</h3>
+      <pre><code><span class="cmt"># On your server</span>
+git clone https://github.com/your-username/linkedin-autopost.git
+cd linkedin-autopost
+
+<span class="cmt"># Create production env file</span>
+cp .env.example .env.production
+nano .env.production  <span class="cmt"># Fill in all values</span></code></pre>
+
+      <div class="callout danger">
+        <div class="callout-icon">🔴</div>
+        <p>Set a <strong>strong, unique</strong> <code>NEXTAUTH_SECRET</code> and <code>ENCRYPTION_KEY</code>. These must never change after first deployment or encrypted data becomes unreadable.</p>
+      </div>
+
+      <h3>2. Run deploy.sh</h3>
+      <pre><code>chmod +x deploy.sh
+./deploy.sh</code></pre>
+
+      <p>The deploy script does the following:</p>
+      <ol>
+        <li>Starts a Redis container (if not already running)</li>
+        <li>Stops and removes old <code>web</code> and <code>worker</code> containers</li>
+        <li>Builds new Docker images for both services</li>
+        <li>Starts <code>linkedin-autopost-web</code> on port <code>4000</code></li>
+        <li>Starts <code>linkedin-autopost-worker</code> (BullMQ background jobs)</li>
+      </ol>
+
+      <h3>3. Seed the Admin Account</h3>
+      <pre><code><span class="cmt"># Run seed inside the web container</span>
+docker exec linkedin-autopost-web node scripts/seed.js
+<span class="cmt"># or if npm run seed is configured:</span>
+docker exec linkedin-autopost-web npm run seed</code></pre>
+
+      <h3>docker-compose.yml Overview</h3>
+      <pre><code><span class="kw">version</span>: <span class="str">'3.8'</span>
+
+<span class="kw">services</span>:
+  <span class="fn">mongodb</span>:
+    image: mongo:latest
+    ports: [<span class="str">"27017:27017"</span>]
+    volumes: [mongodb_data:/data/db]
+
+  <span class="fn">redis</span>:
+    image: redis:alpine
+    ports: [<span class="str">"6379:6379"</span>]
+
+  <span class="fn">web</span>:                   <span class="cmt"># Next.js App</span>
+    build: { target: web }
+    ports: [<span class="str">"4000:3000"</span>]
+    env_file: [.env.production]
+    depends_on: [mongodb, redis]
+
+  <span class="fn">worker</span>:                <span class="cmt"># BullMQ Background Jobs</span>
+    build: { target: worker }
+    env_file: [.env.production]
+    depends_on: [mongodb, redis]</code></pre>
+
+      <h2 id="reverse-proxy">Setting Up a Reverse Proxy (Nginx)</h2>
+      <p>Expose the app on port 80/443 via Nginx:</p>
+      <span class="code-label">📄 /etc/nginx/sites-available/linkedinpost</span>
+      <pre><code><span class="kw">server</span> {
+    listen 80;
+    server_name linkedinpost.example.com;
+    return 301 https://$host$request_uri;
+}
+
+<span class="kw">server</span> {
+    listen 443 ssl;
+    server_name linkedinpost.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+
+    location / {
+        proxy_pass         http://localhost:4000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection 'upgrade';
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</code></pre>
+
+      <pre><code><span class="cmt"># SSL with Let's Encrypt</span>
+certbot --nginx -d linkedinpost.example.com
+
+<span class="cmt"># Enable site and reload</span>
+ln -s /etc/nginx/sites-available/linkedinpost /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx</code></pre>
+
+      <h2 id="linkedin-redirect">Update LinkedIn Redirect URI</h2>
+      <p>After deploying to production, update your LinkedIn Developer App with the production redirect URI:</p>
+      <pre><code>https://linkedinpost.example.com/api/linkedin/callback</code></pre>
+      <p>Also update <code>LINKEDIN_REDIRECT_URI</code> and <code>NEXT_PUBLIC_APP_URL</code> in <code>.env.production</code>, then redeploy.</p>
+
+      <h2 id="updates">Updating the Application</h2>
+      <pre><code><span class="cmt"># Pull latest code</span>
+git pull origin main
+
+<span class="cmt"># Redeploy (rebuilds images, restarts containers)</span>
+./deploy.sh</code></pre>
+
+      <h2 id="logs">Viewing Logs</h2>
+      <pre><code><span class="cmt"># Web server logs</span>
+docker logs linkedin-autopost-web -f
+
+<span class="cmt"># Worker logs</span>
+docker logs linkedin-autopost-worker -f
+
+<span class="cmt"># All containers</span>
+docker compose logs -f</code></pre>
+
+      <h2 id="monitoring">Health Monitoring</h2>
+      <pre><code><span class="cmt"># Check container status</span>
+docker ps
+
+<span class="cmt"># Redis health check</span>
+docker exec linkedin-autopost-redis redis-cli ping
+<span class="cmt"># → PONG</span>
+
+<span class="cmt"># Check BullMQ queues in the UI</span>
+<span class="cmt"># Enable Developer Mode in Settings → Developer</span>
+<span class="cmt"># Navigate to Developer → Job Queues</span></code></pre>
+
+      <h2 id="backup">Backup & Recovery</h2>
+      <pre><code><span class="cmt"># Backup MongoDB</span>
+docker exec linkedin-autopost-mongo \
+  mongodump --db linkedin-autopost --out /data/backup
+docker cp linkedin-autopost-mongo:/data/backup ./mongo-backup-$(date +%Y%m%d)
+
+<span class="cmt"># Restore MongoDB</span>
+docker cp ./mongo-backup linkedin-autopost-mongo:/data/backup
+docker exec linkedin-autopost-mongo \
+  mongorestore --db linkedin-autopost /data/backup/linkedin-autopost</code></pre>
+
+      <div class="callout warning">
+        <div class="callout-icon">⚠️</div>
+        <p>Back up your <code>.env.production</code> file securely. Losing the <code>ENCRYPTION_KEY</code> means all stored API keys and LinkedIn tokens become unrecoverable.</p>
+      </div>
+
+      <h2 id="production-checklist">Production Checklist</h2>
+      <ul class="feature-list">
+        <li>Strong, unique <code>NEXTAUTH_SECRET</code> (32+ chars)</li>
+        <li>Strong, unique <code>ENCRYPTION_KEY</code> (64 hex chars via <code>openssl rand -hex 32</code>)</li>
+        <li><code>NODE_ENV=production</code> set</li>
+        <li>MongoDB with authentication enabled (not open to public)</li>
+        <li>Redis not exposed to public internet</li>
+        <li>HTTPS with valid SSL certificate</li>
+        <li>LinkedIn OAuth redirect URI updated to production URL</li>
+        <li><code>NEXT_PUBLIC_APP_URL</code> set to production HTTPS URL</li>
+        <li>SMTP configured for email notifications</li>
+        <li>Regular database backups scheduled</li>
+        <li><code>.env.production</code> not committed to git</li>
+      </ul>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

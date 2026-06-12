@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installation — LinkedIn AI Publisher Docs</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-icon">in</div>
+      <div class="logo-text"><div class="logo-title">LinkedIn AI Publisher</div><div class="logo-sub">Documentation</div></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Getting Started</div>
+      <a class="nav-link" href="index.html"><span class="icon">🏠</span>Overview</a>
+      <a class="nav-link active" href="installation.html"><span class="icon">⚙️</span>Installation</a>
+      <a class="nav-link" href="configuration.html"><span class="icon">🔧</span>Configuration</a>
+      <a class="nav-link" href="deployment.html"><span class="icon">🚀</span>Deployment</a>
+      <div class="nav-section">Features</div>
+      <a class="nav-link" href="features.html"><span class="icon">✨</span>All Features</a>
+      <a class="nav-link" href="features.html#content-discovery"><span class="icon">💡</span>Content Discovery</a>
+      <a class="nav-link" href="features.html#i-read"><span class="icon">📖</span>I Read</a>
+      <a class="nav-link" href="features.html#campaigns"><span class="icon">🎯</span>Campaigns</a>
+      <a class="nav-link" href="features.html#drafts"><span class="icon">📝</span>Drafts & Approval</a>
+      <a class="nav-link" href="features.html#ai-providers"><span class="icon">🤖</span>AI Providers</a>
+      <div class="nav-section">Reference</div>
+      <a class="nav-link" href="api.html"><span class="icon">📡</span>API Reference</a>
+      <a class="nav-link" href="architecture.html"><span class="icon">🏗️</span>Architecture</a>
+    </nav>
+    <div class="sidebar-footer"><p>v1.0 &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub ↗</a></p></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a><span class="breadcrumb-sep">/</span><span>Installation</span>
+      </div>
+    </div>
+    <div class="page">
+
+      <h1>Installation</h1>
+      <p class="lead">This guide covers setting up LinkedIn AI Publisher locally for development or preparing it for production deployment via Docker.</p>
+
+      <h2 id="prerequisites">Prerequisites</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Requirement</th><th>Version</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Node.js</strong></td><td>≥ 20.x</td><td>LTS recommended</td></tr>
+            <tr><td><strong>npm</strong></td><td>≥ 10.x</td><td>Bundled with Node.js</td></tr>
+            <tr><td><strong>MongoDB</strong></td><td>≥ 6.x</td><td>Local or MongoDB Atlas</td></tr>
+            <tr><td><strong>Redis</strong></td><td>≥ 7.x</td><td>Required for BullMQ job queues</td></tr>
+            <tr><td><strong>Docker</strong></td><td>≥ 24.x</td><td>Optional — for production deployment</td></tr>
+            <tr><td><strong>LinkedIn Developer App</strong></td><td>—</td><td>OAuth credentials required</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="clone">1. Clone the Repository</h2>
+      <pre><code><span class="cmt"># Clone</span>
+git clone https://github.com/your-username/linkedin-autopost.git
+cd linkedin-autopost
+
+<span class="cmt"># Install dependencies</span>
+npm install</code></pre>
+
+      <h2 id="env">2. Environment Setup</h2>
+      <p>Copy the example environment file and fill in your values:</p>
+      <pre><code>cp .env.example .env.local</code></pre>
+      <p>See the <a href="configuration.html">Configuration</a> page for a full reference of all variables.</p>
+
+      <h3>Generate Required Secrets</h3>
+      <pre><code><span class="cmt"># NextAuth secret (min 32 chars)</span>
+openssl rand -base64 32
+
+<span class="cmt"># Encryption key for API key storage (must be 32 hex bytes)</span>
+openssl rand -hex 32</code></pre>
+
+      <h2 id="linkedin-app">3. Create a LinkedIn Developer App</h2>
+      <ol class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Open LinkedIn Developer Portal</strong>
+            <p>Go to <a href="https://www.linkedin.com/developers/apps" target="_blank">linkedin.com/developers/apps</a> and click <em>Create App</em>.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Configure OAuth</strong>
+            <p>Under <em>Auth</em>, add your redirect URI: <code>https://yourdomain.com/api/linkedin/callback</code><br>
+            For local dev: <code>http://localhost:4000/api/linkedin/callback</code></p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Request Required Scopes</strong>
+            <p>Under <em>Products</em>, request access to: <code>openid</code>, <code>profile</code>, <code>email</code>, <code>w_member_social</code></p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Copy Credentials</strong>
+            <p>Copy the <em>Client ID</em> and <em>Client Secret</em> into your <code>.env.local</code> as <code>LINKEDIN_CLIENT_ID</code> and <code>LINKEDIN_CLIENT_SECRET</code>.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="callout warning">
+        <div class="callout-icon">⚠️</div>
+        <p><strong>LinkedIn app verification:</strong> The <code>w_member_social</code> scope (required for posting) needs LinkedIn to verify your app. During development, the app owner's account can test without verification.</p>
+      </div>
+
+      <h2 id="database">4. Database Setup</h2>
+
+      <h3>Option A — Local MongoDB</h3>
+      <pre><code><span class="cmt"># Using Docker for local MongoDB</span>
+docker run -d \
+  --name mongo-dev \
+  -p 27017:27017 \
+  -v mongo-data:/data/db \
+  mongo:latest</code></pre>
+
+      <h3>Option B — MongoDB Atlas (Cloud)</h3>
+      <p>Create a free cluster at <a href="https://cloud.mongodb.com" target="_blank">cloud.mongodb.com</a>, create a database user, whitelist your IP, and copy the connection string into <code>MONGODB_URI</code>.</p>
+
+      <h3>Seed the Admin User</h3>
+      <pre><code><span class="cmt"># Creates the initial admin account from ADMIN_* env vars</span>
+npm run seed</code></pre>
+
+      <h2 id="redis">5. Redis Setup</h2>
+      <pre><code><span class="cmt"># Local Redis via Docker</span>
+docker run -d \
+  --name redis-dev \
+  -p 6379:6379 \
+  redis:alpine</code></pre>
+      <p>Set <code>REDIS_URL=redis://localhost:6379</code> in your <code>.env.local</code>.</p>
+
+      <h2 id="run">6. Run Locally</h2>
+      <pre><code><span class="cmt"># Start the Next.js dev server</span>
+npm run dev
+
+<span class="cmt"># In a separate terminal — start the BullMQ worker</span>
+npm run worker</code></pre>
+
+      <p>The app will be available at <a href="http://localhost:4000" target="_blank">http://localhost:4000</a>.</p>
+
+      <div class="callout success">
+        <div class="callout-icon">✅</div>
+        <p>The worker process is required for: post generation, auto-publishing, campaign scheduling, and email notifications. It must run alongside the web process.</p>
+      </div>
+
+      <h2 id="ai-provider">7. Set Up an AI Provider</h2>
+      <p>Log in to the app, navigate to <strong>Settings → AI Provider</strong>, and configure one of the supported providers:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Provider</th><th>Requires</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>OpenAI</strong></td><td>API key</td><td>GPT-4o, GPT-4, GPT-3.5</td></tr>
+            <tr><td><strong>Anthropic Claude</strong></td><td>API key</td><td>Claude 3.5 Sonnet, Claude 3</td></tr>
+            <tr><td><strong>Google Gemini</strong></td><td>API key</td><td>Gemini Pro, Gemini Flash</td></tr>
+            <tr><td><strong>Ollama</strong></td><td>Ollama endpoint URL</td><td>Self-hosted LLMs — Llama, Mistral, etc.</td></tr>
+            <tr><td><strong>OpenRouter</strong></td><td>API key</td><td>Access to 100+ models via one API</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Keys are encrypted with AES-256-GCM before storage. Available models are fetched automatically from each provider.</p>
+
+      <h2 id="next">Next Steps</h2>
+      <div class="card-grid">
+        <a href="configuration.html" style="text-decoration:none"><div class="card"><div class="card-icon">🔧</div><div class="card-title">Configuration →</div><div class="card-desc">All environment variables explained.</div></div></a>
+        <a href="deployment.html" style="text-decoration:none"><div class="card"><div class="card-icon">🚀</div><div class="card-title">Deployment →</div><div class="card-desc">Docker Compose production deployment guide.</div></div></a>
+        <a href="features.html" style="text-decoration:none"><div class="card"><div class="card-icon">✨</div><div class="card-title">Features →</div><div class="card-desc">Explore Content Discovery, Campaigns, and more.</div></div></a>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

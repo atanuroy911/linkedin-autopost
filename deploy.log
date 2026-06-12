@@ -1,0 +1,379 @@
+Starting Deployment Process...
+Using environment configuration from .env.production
+linkedin-autopost-redis
+db3b7c7ec11c63c4fde8b72d2221c697783d6eb0d9e457e6f8838df56643edfc
+Stopping old containers...
+linkedin-autopost-web
+linkedin-autopost-worker
+Building Application Images...
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  1.409MB
+Step 1/30 : FROM node:20-alpine AS base
+ ---> fb4cd12c85ee
+Step 2/30 : FROM base AS deps
+ ---> fb4cd12c85ee
+Step 3/30 : RUN apk add --no-cache libc6-compat
+ ---> Using cache
+ ---> 24b5118d3819
+Step 4/30 : WORKDIR /app
+ ---> Using cache
+ ---> 5784a65acf33
+Step 5/30 : COPY package.json package-lock.json* ./
+ ---> Using cache
+ ---> dcaa1433376a
+Step 6/30 : RUN npm install -g npm@latest
+ ---> Using cache
+ ---> 096185f86e23
+Step 7/30 : RUN npm approve-scripts --allow-scripts-pending
+ ---> Using cache
+ ---> 9544ae3bceb2
+Step 8/30 : RUN npm ci
+ ---> Using cache
+ ---> f6379832fdf2
+Step 9/30 : FROM base AS builder
+ ---> fb4cd12c85ee
+Step 10/30 : WORKDIR /app
+ ---> Using cache
+ ---> 9c0033d4dbd4
+Step 11/30 : COPY --from=deps /app/node_modules ./node_modules
+ ---> Using cache
+ ---> 337401262a9d
+Step 12/30 : COPY . .
+ ---> cfa3a949b9c1
+Step 13/30 : ENV NEXT_TELEMETRY_DISABLED 1
+ ---> Running in 0fa34b1f6132
+ ---> Removed intermediate container 0fa34b1f6132
+ ---> b3009deb6862
+Step 14/30 : RUN npm run build
+ ---> Running in 30fb6e32aa87
+
+> linkedin-autopost@0.1.0 build
+> next build
+
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.production
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 6.6s
+  Running TypeScript ...
+  Finished TypeScript in 6.9s ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/39) ...
+  Generating static pages using 5 workers (9/39) 
+  Generating static pages using 5 workers (19/39) 
+  Generating static pages using 5 workers (29/39) 
+✓ Generating static pages using 5 workers (39/39) in 338ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin/dashboard
+├ ƒ /admin/logs
+├ ƒ /admin/users
+├ ƒ /api/admin/logs
+├ ƒ /api/admin/stats
+├ ƒ /api/admin/users
+├ ƒ /api/admin/users/[id]
+├ ƒ /api/ai/chat
+├ ƒ /api/ai/models
+├ ƒ /api/ai/settings
+├ ƒ /api/ai/test
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/campaigns
+├ ƒ /api/campaigns/[id]
+├ ƒ /api/content/discover
+├ ƒ /api/content/iread
+├ ƒ /api/dashboard
+├ ƒ /api/developer/queues
+├ ƒ /api/developer/syslogs
+├ ƒ /api/linkedin/callback
+├ ƒ /api/linkedin/connect
+├ ƒ /api/media
+├ ƒ /api/media/[id]
+├ ƒ /api/notifications
+├ ƒ /api/posts
+├ ƒ /api/posts/[id]
+├ ƒ /api/posts/draft
+├ ƒ /api/posts/sync
+├ ƒ /api/preferences
+├ ƒ /campaigns
+├ ƒ /composer/[id]
+├ ƒ /content
+├ ƒ /dashboard
+├ ƒ /developer/logs
+├ ƒ /developer/queues
+├ ƒ /drafts
+├ ○ /login
+├ ƒ /media
+├ ƒ /notifications
+├ ƒ /published
+├ ƒ /scheduled
+└ ƒ /settings
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[91mnpm notice
+npm notice New major version of npm available! 10.8.2 -> 11.17.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.17.0
+npm notice To update run: npm install -g npm@11.17.0
+npm notice
+[0m ---> Removed intermediate container 30fb6e32aa87
+ ---> 82388c2c198c
+Step 15/30 : FROM base AS web
+ ---> fb4cd12c85ee
+Step 16/30 : WORKDIR /app
+ ---> Using cache
+ ---> 9c0033d4dbd4
+Step 17/30 : ENV NODE_ENV production
+ ---> Using cache
+ ---> d175dc7ff58a
+Step 18/30 : ENV NEXT_TELEMETRY_DISABLED 1
+ ---> Using cache
+ ---> ce89884b22f8
+Step 19/30 : RUN addgroup --system --gid 1001 nodejs
+ ---> Using cache
+ ---> bddf5fd6f894
+Step 20/30 : RUN adduser --system --uid 1001 nextjs
+ ---> Using cache
+ ---> 7375c459c652
+Step 21/30 : RUN mkdir .next
+ ---> Using cache
+ ---> ba39b2281961
+Step 22/30 : RUN chown nextjs:nodejs .next
+ ---> Using cache
+ ---> a451e1458f1f
+Step 23/30 : COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+ ---> Using cache
+ ---> f57d7eb7c024
+Step 24/30 : COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+ ---> b23484dd303e
+Step 25/30 : COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+ ---> 3785db092eb5
+Step 26/30 : USER nextjs
+ ---> Running in 39536715f16f
+ ---> Removed intermediate container 39536715f16f
+ ---> ec96739f3bbf
+Step 27/30 : EXPOSE 4000
+ ---> Running in 61d5786e059f
+ ---> Removed intermediate container 61d5786e059f
+ ---> 01164f229bf8
+Step 28/30 : ENV PORT 4000
+ ---> Running in 98e12edf83ee
+ ---> Removed intermediate container 98e12edf83ee
+ ---> db500aecbbec
+Step 29/30 : ENV HOSTNAME "0.0.0.0"
+ ---> Running in 7ab5e2af664c
+ ---> Removed intermediate container 7ab5e2af664c
+ ---> 2417637e4ce8
+Step 30/30 : CMD ["node", "server.js"]
+ ---> Running in 0c5baa58ad08
+ ---> Removed intermediate container 0c5baa58ad08
+ ---> 6676cae20495
+Successfully built 6676cae20495
+Successfully tagged linkedin-autopost-web:latest
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  1.414MB
+Step 1/36 : FROM node:20-alpine AS base
+ ---> fb4cd12c85ee
+Step 2/36 : FROM base AS deps
+ ---> fb4cd12c85ee
+Step 3/36 : RUN apk add --no-cache libc6-compat
+ ---> Using cache
+ ---> 24b5118d3819
+Step 4/36 : WORKDIR /app
+ ---> Using cache
+ ---> 5784a65acf33
+Step 5/36 : COPY package.json package-lock.json* ./
+ ---> Using cache
+ ---> dcaa1433376a
+Step 6/36 : RUN npm install -g npm@latest
+ ---> Using cache
+ ---> 096185f86e23
+Step 7/36 : RUN npm approve-scripts --allow-scripts-pending
+ ---> Using cache
+ ---> 9544ae3bceb2
+Step 8/36 : RUN npm ci
+ ---> Using cache
+ ---> f6379832fdf2
+Step 9/36 : FROM base AS builder
+ ---> fb4cd12c85ee
+Step 10/36 : WORKDIR /app
+ ---> Using cache
+ ---> 9c0033d4dbd4
+Step 11/36 : COPY --from=deps /app/node_modules ./node_modules
+ ---> Using cache
+ ---> 337401262a9d
+Step 12/36 : COPY . .
+ ---> e25552189d6e
+Step 13/36 : ENV NEXT_TELEMETRY_DISABLED 1
+ ---> Running in 4f5468574669
+ ---> Removed intermediate container 4f5468574669
+ ---> 07fb290fa3aa
+Step 14/36 : RUN npm run build
+ ---> Running in 90eb73853872
+
+> linkedin-autopost@0.1.0 build
+> next build
+
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.production
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.1s
+  Running TypeScript ...
+  Finished TypeScript in 6.8s ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/39) ...
+  Generating static pages using 5 workers (9/39) 
+  Generating static pages using 5 workers (19/39) 
+  Generating static pages using 5 workers (29/39) 
+✓ Generating static pages using 5 workers (39/39) in 326ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin/dashboard
+├ ƒ /admin/logs
+├ ƒ /admin/users
+├ ƒ /api/admin/logs
+├ ƒ /api/admin/stats
+├ ƒ /api/admin/users
+├ ƒ /api/admin/users/[id]
+├ ƒ /api/ai/chat
+├ ƒ /api/ai/models
+├ ƒ /api/ai/settings
+├ ƒ /api/ai/test
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/campaigns
+├ ƒ /api/campaigns/[id]
+├ ƒ /api/content/discover
+├ ƒ /api/content/iread
+├ ƒ /api/dashboard
+├ ƒ /api/developer/queues
+├ ƒ /api/developer/syslogs
+├ ƒ /api/linkedin/callback
+├ ƒ /api/linkedin/connect
+├ ƒ /api/media
+├ ƒ /api/media/[id]
+├ ƒ /api/notifications
+├ ƒ /api/posts
+├ ƒ /api/posts/[id]
+├ ƒ /api/posts/draft
+├ ƒ /api/posts/sync
+├ ƒ /api/preferences
+├ ƒ /campaigns
+├ ƒ /composer/[id]
+├ ƒ /content
+├ ƒ /dashboard
+├ ƒ /developer/logs
+├ ƒ /developer/queues
+├ ƒ /drafts
+├ ○ /login
+├ ƒ /media
+├ ƒ /notifications
+├ ƒ /published
+├ ƒ /scheduled
+└ ƒ /settings
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[91mnpm notice
+npm notice New major version of npm available! 10.8.2 -> 11.17.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.17.0
+npm notice To update run: npm install -g npm@11.17.0
+npm notice
+[0m ---> Removed intermediate container 90eb73853872
+ ---> feaaafd98048
+Step 15/36 : FROM base AS web
+ ---> fb4cd12c85ee
+Step 16/36 : WORKDIR /app
+ ---> Using cache
+ ---> 9c0033d4dbd4
+Step 17/36 : ENV NODE_ENV production
+ ---> Using cache
+ ---> d175dc7ff58a
+Step 18/36 : ENV NEXT_TELEMETRY_DISABLED 1
+ ---> Using cache
+ ---> ce89884b22f8
+Step 19/36 : RUN addgroup --system --gid 1001 nodejs
+ ---> Using cache
+ ---> bddf5fd6f894
+Step 20/36 : RUN adduser --system --uid 1001 nextjs
+ ---> Using cache
+ ---> 7375c459c652
+Step 21/36 : RUN mkdir .next
+ ---> Using cache
+ ---> ba39b2281961
+Step 22/36 : RUN chown nextjs:nodejs .next
+ ---> Using cache
+ ---> a451e1458f1f
+Step 23/36 : COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+ ---> Using cache
+ ---> f57d7eb7c024
+Step 24/36 : COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+ ---> 30dfc7ab4a54
+Step 25/36 : COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+ ---> df4059097d38
+Step 26/36 : USER nextjs
+ ---> Running in ae1cfed1a899
+ ---> Removed intermediate container ae1cfed1a899
+ ---> 9d0ca2853f61
+Step 27/36 : EXPOSE 4000
+ ---> Running in 6ae6e5e6f1ab
+ ---> Removed intermediate container 6ae6e5e6f1ab
+ ---> f28f5c3a16d0
+Step 28/36 : ENV PORT 4000
+ ---> Running in 9c7b1f6d0cd2
+ ---> Removed intermediate container 9c7b1f6d0cd2
+ ---> a500819e549e
+Step 29/36 : ENV HOSTNAME "0.0.0.0"
+ ---> Running in 98f710195f21
+ ---> Removed intermediate container 98f710195f21
+ ---> c33561c6f8d5
+Step 30/36 : CMD ["node", "server.js"]
+ ---> Running in 7fd3a7c65b5d
+ ---> Removed intermediate container 7fd3a7c65b5d
+ ---> 5196dd1c395e
+Step 31/36 : FROM base AS worker
+ ---> fb4cd12c85ee
+Step 32/36 : WORKDIR /app
+ ---> Using cache
+ ---> 9c0033d4dbd4
+Step 33/36 : ENV NODE_ENV production
+ ---> Using cache
+ ---> d175dc7ff58a
+Step 34/36 : COPY --from=deps /app/node_modules ./node_modules
+ ---> Using cache
+ ---> d5562a5dc46c
+Step 35/36 : COPY . .
+ ---> 18bf42198ef3
+Step 36/36 : CMD ["npx", "tsx", "src/workers/index.ts"]
+ ---> Running in 68b34fc1494c
+ ---> Removed intermediate container 68b34fc1494c
+ ---> 8d607c1cf0e7
+Successfully built 8d607c1cf0e7
+Successfully tagged linkedin-autopost-worker:latest
+Starting Application Containers...
+078b8aa9b3dcdd45f442e965350cdc02b8d7e4fc061704065e264d0819362301
+ec1abd21c8c6dc3cbaa0aa859463e3ac4e63d3bad6529f669da381997da34996
+Deployment Complete! The application is running at http://localhost:4000 or https://linkedinpost.atanusroy.com

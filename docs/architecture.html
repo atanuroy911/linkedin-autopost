@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture — LinkedIn AI Publisher Docs</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html"><div class="logo-icon">in</div><div class="logo-text"><div class="logo-title">LinkedIn AI Publisher</div><div class="logo-sub">Documentation</div></div></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Getting Started</div>
+      <a class="nav-link" href="index.html"><span class="icon">🏠</span>Overview</a>
+      <a class="nav-link" href="installation.html"><span class="icon">⚙️</span>Installation</a>
+      <a class="nav-link" href="configuration.html"><span class="icon">🔧</span>Configuration</a>
+      <a class="nav-link" href="deployment.html"><span class="icon">🚀</span>Deployment</a>
+      <div class="nav-section">Features</div>
+      <a class="nav-link" href="features.html"><span class="icon">✨</span>All Features</a>
+      <div class="nav-section">Reference</div>
+      <a class="nav-link" href="api.html"><span class="icon">📡</span>API Reference</a>
+      <a class="nav-link active" href="architecture.html"><span class="icon">🏗️</span>Architecture</a>
+      <a class="nav-link" href="architecture.html#workers"><span class="icon">⚡</span>Background Workers</a>
+      <a class="nav-link" href="architecture.html#data-models"><span class="icon">🗄️</span>Data Models</a>
+      <a class="nav-link" href="architecture.html#security"><span class="icon">🔒</span>Security</a>
+    </nav>
+    <div class="sidebar-footer"><p>v1.0 &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub ↗</a></p></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb"><a href="index.html">Docs</a><span class="breadcrumb-sep">/</span><span>Architecture</span></div>
+    </div>
+    <div class="page">
+
+      <h1>System Architecture</h1>
+      <p class="lead">A deep dive into how LinkedIn AI Publisher is structured — from request handling to background workers and data models.</p>
+
+      <h2 id="overview">System Overview</h2>
+      <pre><code>┌───────────────────────────────────────────────────────────────┐
+│                         Browser                               │
+└───────────────────────────┬───────────────────────────────────┘
+                            │ HTTPS
+                ┌───────────▼────────────┐
+                │    Nginx (Reverse Proxy)│
+                │    Port 80/443         │
+                └───────────┬────────────┘
+                            │ Port 4000
+  ┌─────────────────────────▼──────────────────────────────────┐
+  │                 Next.js 16 App                             │
+  │  ┌──────────────┐  ┌─────────────────┐  ┌──────────────┐  │
+  │  │  App Router  │  │   API Routes    │  │  NextAuth    │  │
+  │  │  (UI pages)  │  │   /api/*        │  │  (Sessions)  │  │
+  │  └──────────────┘  └────────┬────────┘  └──────────────┘  │
+  └────────────────────────────┬┘───────────────────────────────┘
+                               │
+          ┌────────────────────┼─────────────────────┐
+          │                    │                     │
+  ┌───────▼──────┐  ┌──────────▼───────┐  ┌────────▼────────┐
+  │   MongoDB    │  │      Redis        │  │  LinkedIn API   │
+  │  (Database)  │  │  (Jobs + Cache)   │  │   (OAuth +      │
+  │              │  │                   │  │    Posting)     │
+  └───────┬──────┘  └──────────┬────────┘  └─────────────────┘
+          │                    │
+          │         ┌──────────▼───────────────────────┐
+          └─────────│         BullMQ Worker             │
+                    │  (Separate Node.js process)       │
+                    │                                   │
+                    │  ● content-generation             │
+                    │  ● auto-publish                   │
+                    │  ● campaign-runner (cron)         │
+                    │  ● scheduled-publish              │
+                    │  ● notification                   │
+                    │  ● token-refresh                  │
+                    └───────────────────────────────────┘</code></pre>
+
+      <h2 id="project-structure">Project Structure</h2>
+      <pre><code>linkedin-autopost/
+├── src/
+│   ├── app/
+│   │   ├── (dashboard)/          <span class="cmt"># Authenticated UI pages</span>
+│   │   │   ├── campaigns/
+│   │   │   ├── content/
+│   │   │   ├── drafts/
+│   │   │   ├── dashboard/
+│   │   │   ├── published/
+│   │   │   ├── scheduled/
+│   │   │   ├── media/
+│   │   │   ├── notifications/
+│   │   │   ├── settings/
+│   │   │   └── developer/
+│   │   ├── api/                  <span class="cmt"># API route handlers</span>
+│   │   │   ├── ai/
+│   │   │   ├── admin/
+│   │   │   ├── auth/
+│   │   │   ├── campaigns/
+│   │   │   ├── content/
+│   │   │   ├── dashboard/
+│   │   │   ├── developer/
+│   │   │   ├── linkedin/
+│   │   │   ├── media/
+│   │   │   ├── notifications/
+│   │   │   ├── posts/
+│   │   │   └── preferences/
+│   │   ├── login/
+│   │   └── layout.tsx
+│   ├── components/
+│   │   ├── layout/               <span class="cmt"># Sidebar, Topbar</span>
+│   │   └── ui/                   <span class="cmt"># Shared UI components</span>
+│   ├── lib/
+│   │   ├── ai/                   <span class="cmt"># AI provider clients</span>
+│   │   ├── db/
+│   │   │   ├── connection.ts
+│   │   │   └── models/           <span class="cmt"># Mongoose models</span>
+│   │   ├── email/
+│   │   │   └── mailer.ts
+│   │   ├── linkedin/
+│   │   │   └── publish.ts
+│   │   ├── auth.ts
+│   │   ├── encryption.ts
+│   │   └── syslogger.ts
+│   ├── workers/
+│   │   ├── index.ts              <span class="cmt"># Worker bootstrap</span>
+│   │   ├── queues.ts             <span class="cmt"># Queue definitions</span>
+│   │   ├── autoPublish.ts
+│   │   ├── campaign.ts
+│   │   ├── contentGeneration.ts
+│   │   ├── notification.ts
+│   │   └── tokenRefresh.ts
+│   └── types/
+│       └── index.ts
+├── docs/                         <span class="cmt"># This documentation</span>
+├── Dockerfile
+├── docker-compose.yml
+├── deploy.sh
+└── .env.example</code></pre>
+
+      <!-- ─── Workers ─── -->
+      <h2 id="workers">⚡ Background Workers</h2>
+      <p>Background work is handled by BullMQ running in a separate Node.js process (<code>npm run worker</code>). All workers connect to the same Redis instance and MongoDB database as the web app.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Queue Name</th><th>Worker</th><th>Triggered By</th><th>Does What</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>content-generation</code></td>
+              <td>contentGeneration.ts</td>
+              <td>POST /api/posts</td>
+              <td>Calls AI provider, generates post content, saves as draft</td>
+            </tr>
+            <tr>
+              <td><code>auto-publish</code></td>
+              <td>autoPublish.ts</td>
+              <td>Post approval or AUTO_PUBLISH_DELAY</td>
+              <td>Publishes approved post to LinkedIn, creates PublishedPost record</td>
+            </tr>
+            <tr>
+              <td><code>scheduled-publish</code></td>
+              <td>autoPublish.ts</td>
+              <td>ScheduledPost delay job</td>
+              <td>Publishes a scheduled post at the specified date/time</td>
+            </tr>
+            <tr>
+              <td><code>campaign-runner</code></td>
+              <td>campaign.ts</td>
+              <td>BullMQ cron (campaign schedule)</td>
+              <td>Generates post for campaign, routes to auto-publish or email approval</td>
+            </tr>
+            <tr>
+              <td><code>notification</code></td>
+              <td>notification.ts</td>
+              <td>Other workers</td>
+              <td>Saves in-app notification, optionally sends SMTP email</td>
+            </tr>
+            <tr>
+              <td><code>token-refresh</code></td>
+              <td>tokenRefresh.ts</td>
+              <td>Cron (every 6h)</td>
+              <td>Refreshes LinkedIn OAuth access tokens before expiry</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Campaign Cron Scheduling</h3>
+      <p>When a campaign is activated, a <strong>repeating BullMQ job</strong> is added with a cron expression computed from the schedule config:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Schedule Config</th><th>Cron Expression</th></tr></thead>
+          <tbody>
+            <tr><td>Weekly, Monday + Wednesday, 9:00 AM</td><td><code>0 9 * * 1,3</code></td></tr>
+            <tr><td>Weekly, Friday, 6:30 PM</td><td><code>30 18 * * 5</code></td></tr>
+            <tr><td>Monthly, 1st + 15th, 9:00 AM</td><td><code>0 9 1,15 * *</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>When a campaign is paused or deleted, the repeating job is removed via <code>queue.removeRepeatableByKey(key)</code>. The job key is stored on the Campaign document.</p>
+
+      <!-- ─── AI Module ─── -->
+      <h2 id="ai-module">🤖 AI Provider Module</h2>
+      <p>All AI providers implement a common <code>IAIProviderClient</code> interface:</p>
+      <pre><code><span class="kw">interface</span> <span class="fn">IAIProviderClient</span> {
+  <span class="fn">chat</span>(messages: <span class="fn">Message</span>[]): <span class="fn">Promise</span>&lt;<span class="val">string</span>&gt;
+  <span class="fn">getModels</span>(): <span class="fn">Promise</span>&lt;<span class="val">string</span>[]&gt;
+  <span class="fn">testConnection</span>(): <span class="fn">Promise</span>&lt;<span class="val">boolean</span>&gt;
+}</code></pre>
+
+      <p>Providers are instantiated via factory:</p>
+      <pre><code><span class="kw">const</span> client = <span class="fn">createAIProvider</span>(provider, config)
+<span class="cmt">// provider: 'openai' | 'claude' | 'gemini' | 'ollama' | 'openrouter'</span>
+<span class="cmt">// config: { apiKey, ollamaEndpoint, defaultModel, generationSettings }</span></code></pre>
+
+      <!-- ─── Data Models ─── -->
+      <h2 id="data-models">🗄️ Data Models</h2>
+
+      <h3>User</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>email</code></td><td>String</td><td>Unique login email</td></tr>
+            <tr><td><code>name</code></td><td>String</td><td>Display name</td></tr>
+            <tr><td><code>role</code></td><td><code>user | admin</code></td><td>Access control role</td></tr>
+            <tr><td><code>status</code></td><td><code>active | suspended</code></td><td>Account status</td></tr>
+            <tr><td><code>settings</code></td><td>Object</td><td>Notification preferences, developer mode flag</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>GeneratedPost</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>userId</code></td><td>ObjectId</td><td>Owning user</td></tr>
+            <tr><td><code>content</code></td><td>String</td><td>Post text</td></tr>
+            <tr><td><code>hashtags</code></td><td>String[]</td><td>Hashtags (without #)</td></tr>
+            <tr><td><code>status</code></td><td>Enum</td><td>draft / pending_approval / approved / scheduled / published / rejected</td></tr>
+            <tr><td><code>aiProvider</code></td><td>String</td><td>Provider that generated it</td></tr>
+            <tr><td><code>modelUsed</code></td><td>String</td><td>Model name used for generation</td></tr>
+            <tr><td><code>postType</code></td><td>Enum</td><td>text / image / video / link / document</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Campaign</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Mutable</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>name</code></td><td>✅</td><td>Campaign display name</td></tr>
+            <tr><td><code>niche.industry</code></td><td>❌</td><td>Target industry (locked at creation)</td></tr>
+            <tr><td><code>niche.topics</code></td><td>❌</td><td>Content topics (locked at creation)</td></tr>
+            <tr><td><code>niche.keywords</code></td><td>❌</td><td>Keywords (locked at creation)</td></tr>
+            <tr><td><code>tone</code></td><td>✅</td><td>Writing tone</td></tr>
+            <tr><td><code>examplePosts</code></td><td>✅</td><td>Style examples (up to 3)</td></tr>
+            <tr><td><code>schedule</code></td><td>✅</td><td>Cron schedule config</td></tr>
+            <tr><td><code>approvalMode</code></td><td>✅</td><td>auto or email</td></tr>
+            <tr><td><code>isActive</code></td><td>✅</td><td>Whether cron job is running</td></tr>
+            <tr><td><code>repeatJobKey</code></td><td>Internal</td><td>BullMQ key for removing the cron job</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>LinkedInAccount</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>linkedinId</code></td><td>LinkedIn user URN</td></tr>
+            <tr><td><code>accessToken</code></td><td>AES-256-GCM encrypted OAuth token</td></tr>
+            <tr><td><code>refreshToken</code></td><td>Encrypted refresh token</td></tr>
+            <tr><td><code>tokenExpiresAt</code></td><td>Token expiry date</td></tr>
+            <tr><td><code>isConnected</code></td><td>Whether the connection is active</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ─── Security ─── -->
+      <h2 id="security">🔒 Security</h2>
+
+      <h3>Authentication</h3>
+      <ul class="feature-list">
+        <li>Session-based authentication via NextAuth.js with HTTP-only cookies</li>
+        <li>Passwords hashed with bcrypt (salt rounds: 12)</li>
+        <li>JWT sessions signed with <code>NEXTAUTH_SECRET</code></li>
+        <li>Role-based access: <code>user</code> vs <code>admin</code></li>
+      </ul>
+
+      <h3>Encryption</h3>
+      <ul class="feature-list">
+        <li>All API keys (OpenAI, Claude, etc.) encrypted with AES-256-GCM before MongoDB storage</li>
+        <li>LinkedIn OAuth tokens encrypted with the same key</li>
+        <li>Encryption key is never stored — must be provided via environment variable</li>
+        <li>Each encrypted value uses a unique random IV (initialisation vector)</li>
+      </ul>
+
+      <h3>Rate Limiting</h3>
+      <ul class="feature-list">
+        <li>Configurable rate limiting via <code>RATE_LIMIT_MAX</code> and <code>RATE_LIMIT_WINDOW_MS</code></li>
+        <li>Applied at the API route level</li>
+      </ul>
+
+      <h3>Data Isolation</h3>
+      <ul class="feature-list">
+        <li>All database queries are scoped to <code>userId</code> from the session</li>
+        <li>Admin routes verify <code>role === "admin"</code> on every request</li>
+        <li>LinkedIn accounts are never shared between users</li>
+      </ul>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

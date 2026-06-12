@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration — LinkedIn AI Publisher Docs</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html"><div class="logo-icon">in</div><div class="logo-text"><div class="logo-title">LinkedIn AI Publisher</div><div class="logo-sub">Documentation</div></div></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Getting Started</div>
+      <a class="nav-link" href="index.html"><span class="icon">🏠</span>Overview</a>
+      <a class="nav-link" href="installation.html"><span class="icon">⚙️</span>Installation</a>
+      <a class="nav-link active" href="configuration.html"><span class="icon">🔧</span>Configuration</a>
+      <a class="nav-link" href="deployment.html"><span class="icon">🚀</span>Deployment</a>
+      <div class="nav-section">Features</div>
+      <a class="nav-link" href="features.html"><span class="icon">✨</span>All Features</a>
+      <a class="nav-link" href="features.html#content-discovery"><span class="icon">💡</span>Content Discovery</a>
+      <a class="nav-link" href="features.html#i-read"><span class="icon">📖</span>I Read</a>
+      <a class="nav-link" href="features.html#campaigns"><span class="icon">🎯</span>Campaigns</a>
+      <a class="nav-link" href="features.html#drafts"><span class="icon">📝</span>Drafts & Approval</a>
+      <a class="nav-link" href="features.html#ai-providers"><span class="icon">🤖</span>AI Providers</a>
+      <div class="nav-section">Reference</div>
+      <a class="nav-link" href="api.html"><span class="icon">📡</span>API Reference</a>
+      <a class="nav-link" href="architecture.html"><span class="icon">🏗️</span>Architecture</a>
+    </nav>
+    <div class="sidebar-footer"><p>v1.0 &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub ↗</a></p></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb"><a href="index.html">Docs</a><span class="breadcrumb-sep">/</span><span>Configuration</span></div>
+    </div>
+    <div class="page">
+
+      <h1>Configuration</h1>
+      <p class="lead">All configuration is done via environment variables. Copy <code>.env.example</code> to <code>.env.production</code> (for Docker) or <code>.env.local</code> (for local development) and fill in your values.</p>
+
+      <div class="callout warning">
+        <div class="callout-icon">⚠️</div>
+        <p>Never commit <code>.env.production</code> or <code>.env.local</code> to version control. Both are in <code>.gitignore</code> by default.</p>
+      </div>
+
+      <h2 id="app">Application</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Default</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>NEXT_PUBLIC_APP_URL</code></td><td><code>http://localhost:4000</code></td><td><span class="badge badge-red">Yes</span></td><td>Public URL of the app — used in emails, OAuth callbacks, and LinkedIn redirect URIs</td></tr>
+            <tr><td><code>NEXT_PUBLIC_APP_NAME</code></td><td><code>LinkedIn AI Publisher</code></td><td><span class="badge badge-gray">No</span></td><td>App name shown in the UI and emails</td></tr>
+            <tr><td><code>NODE_ENV</code></td><td><code>development</code></td><td><span class="badge badge-gray">No</span></td><td>Set to <code>production</code> in production environments</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="auth">Authentication (NextAuth)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>NEXTAUTH_URL</code></td><td><span class="badge badge-red">Yes</span></td><td>Must match <code>NEXT_PUBLIC_APP_URL</code>. Used by NextAuth for callback URLs.</td></tr>
+            <tr><td><code>NEXTAUTH_SECRET</code></td><td><span class="badge badge-red">Yes</span></td><td>Min 32-character random string. Generate: <code>openssl rand -base64 32</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="admin">Admin Bootstrap</h2>
+      <p>These are used by <code>npm run seed</code> to create the initial admin account. Only used once on first setup.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>ADMIN_EMAIL</code></td><td>Admin login email</td></tr>
+            <tr><td><code>ADMIN_PASSWORD</code></td><td>Admin password (min 8 chars, must include uppercase + number + symbol)</td></tr>
+            <tr><td><code>ADMIN_NAME</code></td><td>Admin display name</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="mongodb">MongoDB</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Required</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>MONGODB_URI</code></td><td><span class="badge badge-red">Yes</span></td><td><code>mongodb://localhost:27017/linkedin-ai-publisher</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info">
+        <div class="callout-icon">ℹ️</div>
+        <p>In Docker Compose, the web container overrides this to <code>mongodb://mongodb:27017/linkedin-autopost</code> using the internal Docker network hostname.</p>
+      </div>
+
+      <h2 id="redis">Redis</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Required</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>REDIS_URL</code></td><td><span class="badge badge-red">Yes</span></td><td><code>redis://localhost:6379</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="linkedin">LinkedIn OAuth</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>LINKEDIN_CLIENT_ID</code></td><td><span class="badge badge-red">Yes</span></td><td>From LinkedIn Developer App → Auth tab</td></tr>
+            <tr><td><code>LINKEDIN_CLIENT_SECRET</code></td><td><span class="badge badge-red">Yes</span></td><td>From LinkedIn Developer App → Auth tab</td></tr>
+            <tr><td><code>LINKEDIN_REDIRECT_URI</code></td><td><span class="badge badge-red">Yes</span></td><td>Must match exactly: <code>{APP_URL}/api/linkedin/callback</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Required OAuth Scopes</h3>
+      <p>Your LinkedIn app must have access to these scopes (granted via LinkedIn's Products section):</p>
+      <div class="stack">
+        <div class="stack-item"><code>openid</code></div>
+        <div class="stack-item"><code>profile</code></div>
+        <div class="stack-item"><code>email</code></div>
+        <div class="stack-item"><code>w_member_social</code></div>
+      </div>
+
+      <h2 id="encryption">Encryption</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>ENCRYPTION_KEY</code></td><td><span class="badge badge-red">Yes</span></td><td>32-byte hex string (64 hex chars). Used for AES-256-GCM encryption of AI provider API keys and LinkedIn tokens. Generate: <code>openssl rand -hex 32</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout danger">
+        <div class="callout-icon">🔴</div>
+        <p><strong>Critical:</strong> Changing the encryption key after users have saved API keys will make those keys unreadable. Back this up securely and never rotate it without a migration.</p>
+      </div>
+
+      <h2 id="smtp">Email / SMTP</h2>
+      <p>Used for campaign approval emails and notification emails. Set <code>SMTP_ENABLED=false</code> to disable all outbound email.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>SMTP_ENABLED</code></td><td><code>false</code></td><td>Set to <code>true</code> to enable email sending</td></tr>
+            <tr><td><code>SMTP_HOST</code></td><td><code>smtp.gmail.com</code></td><td>SMTP server hostname</td></tr>
+            <tr><td><code>SMTP_PORT</code></td><td><code>587</code></td><td>SMTP port (587 for STARTTLS, 465 for SSL)</td></tr>
+            <tr><td><code>SMTP_SECURE</code></td><td><code>false</code></td><td>Set <code>true</code> for port 465 (SSL)</td></tr>
+            <tr><td><code>SMTP_USER</code></td><td>—</td><td>SMTP authentication username</td></tr>
+            <tr><td><code>SMTP_PASS</code></td><td>—</td><td>SMTP password or app password</td></tr>
+            <tr><td><code>SMTP_FROM</code></td><td>—</td><td>From address, e.g. <code>"LinkedIn AI Publisher &lt;noreply@domain.com&gt;"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Gmail Setup</h3>
+      <pre><code>SMTP_ENABLED=true
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your@gmail.com
+SMTP_PASS=xxxx-xxxx-xxxx-xxxx   <span class="cmt"># Gmail App Password (not your login password)</span>
+SMTP_FROM="LinkedIn AI Publisher &lt;your@gmail.com&gt;"</code></pre>
+
+      <h2 id="ai">AI Providers (Global Fallbacks)</h2>
+      <p>Users configure their own API keys per-account in Settings. These server-level variables act as optional global fallbacks only.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Provider</th></tr></thead>
+          <tbody>
+            <tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI (GPT-4, GPT-3.5)</td></tr>
+            <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Anthropic Claude</td></tr>
+            <tr><td><code>GEMINI_API_KEY</code></td><td>Google Gemini</td></tr>
+            <tr><td><code>OLLAMA_BASE_URL</code></td><td>Ollama (local LLMs) — e.g. <code>http://localhost:11434</code></td></tr>
+            <tr><td><code>OPENROUTER_API_KEY</code></td><td>OpenRouter (100+ models)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="workers">Background Workers</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>WORKER_CONCURRENCY</code></td><td><code>5</code></td><td>Max concurrent BullMQ jobs</td></tr>
+            <tr><td><code>AUTO_PUBLISH_DELAY_HOURS</code></td><td><code>24</code></td><td>Hours to wait before auto-publishing a draft (if auto-publish is enabled)</td></tr>
+            <tr><td><code>TOKEN_REFRESH_INTERVAL_HOURS</code></td><td><code>6</code></td><td>How often to refresh LinkedIn OAuth tokens</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="rate-limiting">Rate Limiting</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>RATE_LIMIT_MAX</code></td><td><code>100</code></td><td>Max requests per window per IP</td></tr>
+            <tr><td><code>RATE_LIMIT_WINDOW_MS</code></td><td><code>900000</code></td><td>Window in milliseconds (900000 = 15 minutes)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="example">Complete Example</h2>
+      <span class="code-label">📄 .env.production</span>
+      <pre><code><span class="cmt"># App</span>
+NEXT_PUBLIC_APP_URL=https://linkedinpost.example.com
+NEXT_PUBLIC_APP_NAME="LinkedIn AI Publisher"
+NODE_ENV=production
+
+<span class="cmt"># Auth</span>
+NEXTAUTH_URL=https://linkedinpost.example.com
+NEXTAUTH_SECRET=<span class="val">your-super-secret-min-32-chars</span>
+
+<span class="cmt"># Admin (used only for seeding)</span>
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=Admin@123456
+ADMIN_NAME="System Administrator"
+
+<span class="cmt"># LinkedIn OAuth</span>
+LINKEDIN_CLIENT_ID=<span class="val">86xxxxxxxxxx</span>
+LINKEDIN_CLIENT_SECRET=<span class="val">xxxxxxxxxxxxxxxx</span>
+LINKEDIN_REDIRECT_URI=https://linkedinpost.example.com/api/linkedin/callback
+
+<span class="cmt"># Encryption (openssl rand -hex 32)</span>
+ENCRYPTION_KEY=<span class="val">a3f9c2b8e1d7...</span>
+
+<span class="cmt"># Infrastructure (overridden by docker-compose)</span>
+MONGODB_URI=mongodb://localhost:27017/linkedin-autopost
+REDIS_URL=redis://localhost:6379
+
+<span class="cmt"># Email</span>
+SMTP_ENABLED=true
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=you@gmail.com
+SMTP_PASS=xxxx-xxxx-xxxx-xxxx
+SMTP_FROM="LinkedIn AI Publisher &lt;noreply@example.com&gt;"
+
+<span class="cmt"># Workers</span>
+WORKER_CONCURRENCY=5
+AUTO_PUBLISH_DELAY_HOURS=24
+TOKEN_REFRESH_INTERVAL_HOURS=6</code></pre>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
